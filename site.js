@@ -1,4 +1,4 @@
-// YouTube videosu yalnız tıklanınca yüklenir (hız ve gizlilik)
+// Video yalnız tıklanınca yüklenir
 document.addEventListener("click", function (ev) {
   var b = ev.target.closest(".oynat");
   if (!b || b.querySelector("iframe")) return;
@@ -8,31 +8,36 @@ document.addEventListener("click", function (ev) {
   f.allowFullscreen = true; f.title = b.getAttribute("aria-label") || "Video";
   b.appendChild(f);
 });
-// arama ve süzgeç
+// Mobil menü
+(function () {
+  var b = document.querySelector(".menu-ac"), m = document.getElementById("menu");
+  if (!b) return;
+  b.addEventListener("click", function () { var a = m.classList.toggle("acik"); b.setAttribute("aria-expanded", a); });
+})();
+// Eserler: arama, kanal ve duygu süzgeci
 (function () {
   var izgara = document.getElementById("izgara"); if (!izgara) return;
-  var kartlar = Array.prototype.slice.call(izgara.children), ara = document.getElementById("ara");
-  var sonuc = document.getElementById("sonuc"), bos = document.getElementById("bos"), duygu = "", kanal = "";
+  var kartlar = Array.prototype.slice.call(izgara.children), ara = document.getElementById("ara"), sec = document.getElementById("kanal");
+  var sonuc = document.getElementById("sonuc"), bos = document.getElementById("bos"), duygu = "";
+  var p = new URLSearchParams(location.search);
+  if (p.get("q")) ara.value = p.get("q");
+  if (p.get("kanal")) sec.value = p.get("kanal");
   function tr(s) { return s.toLocaleLowerCase("tr"); }
   function uygula() {
-    var q = tr(ara.value.trim()), n = 0;
-    kartlar.forEach(function (k) {
-      var ok = (!q || k.dataset.ara.indexOf(q) > -1) && (!duygu || (" " + k.dataset.duygu + " ").indexOf(" " + duygu + " ") > -1) && (!kanal || k.dataset.kanal === kanal);
-      k.hidden = !ok; if (ok) n++;
+    var q = tr(ara.value.trim()), k = sec.value, n = 0;
+    kartlar.forEach(function (c) {
+      var ok = (!q || c.dataset.ara.indexOf(q) > -1) && (!duygu || (" " + c.dataset.duygu + " ").indexOf(" " + duygu + " ") > -1) && (!k || c.dataset.kanal === k);
+      c.hidden = !ok; if (ok) n++;
     });
     sonuc.textContent = n + " eser"; bos.hidden = n > 0;
   }
-  ara.addEventListener("input", uygula);
+  ara.addEventListener("input", uygula); sec.addEventListener("change", uygula);
   document.querySelectorAll(".filtre").forEach(function (b) {
     b.addEventListener("click", function () {
-      duygu = b.dataset.f; kanal = "";
+      duygu = b.dataset.f;
       document.querySelectorAll(".filtre").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
       uygula();
     });
   });
-  document.querySelectorAll(".filtre-kanal").forEach(function (b) {
-    b.addEventListener("click", function () { kanal = b.dataset.k; duygu = "";
-      document.querySelectorAll(".filtre").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.f === "" ? "true" : "false"); });
-      uygula(); document.getElementById("eserler").scrollIntoView(); });
-  });
+  uygula();
 })();
