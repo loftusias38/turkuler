@@ -41,3 +41,15 @@ document.addEventListener("click", function (ev) {
   });
   uygula();
 })();
+// Kaydırınca beliren bölümler
+(function () {
+  if (!("IntersectionObserver" in window)) return;
+  document.documentElement.classList.add("js");
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("gorunur"); io.unobserve(e.target); } });
+  }, { rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".raf,.bolum>ul>li,.eser-izgara,.hik-not").forEach(function (el, i) {
+    if (el.matches(".bolum>ul>li")) el.style.transitionDelay = (i % 6) * 45 + "ms";
+    io.observe(el);
+  });
+})();
